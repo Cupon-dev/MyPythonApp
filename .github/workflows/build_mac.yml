@@ -1,0 +1,25 @@
+name: Build macOS DMG
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Build App
+        run: pyinstaller --windowed --onefile --name MyApp your_script.py
+      - name: Create DMG
+        run: |
+          mkdir MyApp
+          cp -r dist/MyApp.app MyApp/
+          hdiutil create -volname "MyApp" -srcfolder MyApp/ -ov -format UDZO MyApp.dmg
+      - name: Upload DMG
+        uses: actions/upload-artifact@v3
+        with:
+          name: MyApp-DMG
+          path: MyApp.dmg
